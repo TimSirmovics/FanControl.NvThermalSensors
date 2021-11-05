@@ -4,5 +4,5 @@ Plugin for [FanControl](https://github.com/Rem0o/FanControl.Releases) that provi
 
 ## To install
 
-1. Compile the solution.
-2. Copy FanControl.NvThermalSensors.dll from the release directory into the FanControl "plugins" folder.
+1. Download FanControl.NvThermalSensors.dll from the [Releases](https://github.com/TimSirmovics/FanControl.NvThermalSensors/releases) page
+2. Place it into the FanControl "plugins" folder.
