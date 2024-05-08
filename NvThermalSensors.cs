@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using FanControl.Plugins;
+using System.Collections.Generic;
 
 namespace FanControl.NvThermalSensors
 {
@@ -14,9 +15,9 @@ namespace FanControl.NvThermalSensors
 
             var gpuName = GetGpuName(handle, gpuIndex);
 
-            if (GetSensorValue(handle, mask, 1) != 0)
+            if (GetSensorValue(handle, mask, 1) != null)
                 Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Hot Spot", () => GetSensorValue(handle, mask, 1)));
-            if (GetSensorValue(handle, mask, 9) != 0)
+            if (GetSensorValue(handle, mask, 9) != null)
                 Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Memory Junction", () => GetSensorValue(handle, mask, 9)));
         }
 
@@ -57,9 +58,13 @@ namespace FanControl.NvThermalSensors
             return status == NvApi.NvStatus.OK ? gpuName.Value.Trim() : $"GPU - {gpuIndex}";
         }
 
-        private float GetSensorValue(NvApi.NvPhysicalGpuHandle handle, uint mask, int index)
+        private float? GetSensorValue(NvApi.NvPhysicalGpuHandle handle, uint mask, int index)
         {
-            return GetThermalSensors(handle, mask, out _).Temperatures[index] / 256.0f;
+            var thermalSensors = GetThermalSensors(handle, mask, out NvApi.NvStatus thermalSensorsStatus);
+            if (thermalSensorsStatus != NvApi.NvStatus.OK)
+                return null;
+
+            return thermalSensors.Temperatures[index] / 256.0f;
         }
     }
 }

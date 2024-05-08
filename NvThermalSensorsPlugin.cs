@@ -6,9 +6,17 @@ namespace FanControl.NvThermalSensors
 {
     public class NvThermalSensorsPlugin : IPlugin
     {
+        private readonly IPluginLogger _logger;
+
         private Dictionary<int, NvApi.NvPhysicalGpuHandle> _handles;
 
         public string Name => "NvThermalSensors";
+
+        public NvThermalSensorsPlugin(IPluginLogger logger)
+        {
+            _logger = logger;
+        }
+
 
         public void Close()
         {
@@ -18,8 +26,11 @@ namespace FanControl.NvThermalSensors
         public void Initialize()
         {
             var handles = new NvApi.NvPhysicalGpuHandle[NvApi.MAX_PHYSICAL_GPUS];
-            if (NvApi.NvAPI_EnumPhysicalGPUs(handles, out int count) != NvApi.NvStatus.OK)
+            if (NvApi.NvAPI_EnumPhysicalGPUs(handles, out int count) != NvApi.NvStatus.OK || count == 0)
+            {
+                _logger.Log("Error retrieving GPUs.");
                 return;
+            }
 
             _handles = new Dictionary<int, NvApi.NvPhysicalGpuHandle>(count);
             for (int i = 0; i < count; i++)
