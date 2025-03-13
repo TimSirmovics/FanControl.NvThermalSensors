@@ -19,7 +19,7 @@ namespace FanControl.NvThermalSensors
             if (GetSensorValue(handle, mask, 1) != null)
                 Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Hot Spot", () => GetSensorValue(handle, mask, 1)));
             if (GetSensorValue(handle, mask, sensorcount - 1) != null)
-                Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Memory Junction", () => GetSensorValue(handle, mask, 9)));
+                Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Memory Junction", () => GetSensorValue(handle, mask, sensorcount - 1)));
         }
 
         internal List<NvThermalSensor> Sensors { get; }
