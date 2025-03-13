@@ -1,5 +1,4 @@
-﻿using FanControl.Plugins;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace FanControl.NvThermalSensors
 {
@@ -10,14 +9,16 @@ namespace FanControl.NvThermalSensors
             Sensors = new List<NvThermalSensor>();
 
             var mask = FindThermalSensorMask(handle);
+
             if (mask == 0)
                 return;
 
             var gpuName = GetGpuName(handle, gpuIndex);
+            var sensorcount = GetSensorCount(mask);
 
             if (GetSensorValue(handle, mask, 1) != null)
                 Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Hot Spot", () => GetSensorValue(handle, mask, 1)));
-            if (GetSensorValue(handle, mask, 9) != null)
+            if (GetSensorValue(handle, mask, sensorcount - 1) != null)
                 Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Memory Junction", () => GetSensorValue(handle, mask, 9)));
         }
 
@@ -36,6 +37,19 @@ namespace FanControl.NvThermalSensors
             }
 
             return --mask;
+        }
+
+        private int GetSensorCount(uint mask)
+        {
+            var sensorCount = 0;
+
+            while (mask > 0)
+            {
+                mask &= (mask - 1);
+                sensorCount++;
+            }
+
+            return sensorCount;
         }
 
         private NvApi.NvThermalSensors GetThermalSensors(NvApi.NvPhysicalGpuHandle handle, uint mask, out NvApi.NvStatus status)
