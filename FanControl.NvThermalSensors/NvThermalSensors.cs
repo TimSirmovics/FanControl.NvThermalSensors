@@ -4,8 +4,11 @@ namespace FanControl.NvThermalSensors
 {
     internal class NvThermalSensors
     {
-        internal NvThermalSensors(int gpuIndex, NvApi.NvPhysicalGpuHandle handle)
+        private INvApi _nvidiaApi;
+
+        internal NvThermalSensors(int gpuIndex, NvApi.NvPhysicalGpuHandle handle, INvApi nvidiaApi)
         {
+            _nvidiaApi = nvidiaApi;
             Sensors = new List<NvThermalSensor>();
 
             var mask = FindThermalSensorMask(handle);
@@ -16,10 +19,18 @@ namespace FanControl.NvThermalSensors
             var gpuName = GetGpuName(handle, gpuIndex);
             var sensorcount = GetSensorCount(mask);
 
-            if (GetSensorValue(handle, mask, 1) != null)
-                Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Hot Spot", () => GetSensorValue(handle, mask, 1)));
-            if (GetSensorValue(handle, mask, sensorcount - 1) != null)
-                Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Memory Junction", () => GetSensorValue(handle, mask, sensorcount - 1)));
+            if (gpuName.Contains("RTX 50"))
+            {
+                if (GetSensorValue(handle, mask, 2) != null)
+                    Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Memory Junction", () => GetSensorValue(handle, mask, 2)));
+            }
+            else
+            {
+                if (GetSensorValue(handle, mask, 1) != null)
+                    Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Hot Spot", () => GetSensorValue(handle, mask, 1)));
+                if (GetSensorValue(handle, mask, sensorcount - 1) != null)
+                    Sensors.Add(new NvThermalSensor(gpuIndex, $"{gpuName} - Memory Junction", () => GetSensorValue(handle, mask, sensorcount - 1)));
+            }
         }
 
         internal List<NvThermalSensor> Sensors { get; }
@@ -60,14 +71,14 @@ namespace FanControl.NvThermalSensors
                 Mask = mask
             };
 
-            status = NvApi.NvAPI_GPU_ThermalGetSensors(handle, ref thermalSensors);
+            status = _nvidiaApi.NvAPI_GPU_ThermalGetSensors(handle, ref thermalSensors);
             return status == NvApi.NvStatus.OK ? thermalSensors : default;
         }
 
         private string GetGpuName(NvApi.NvPhysicalGpuHandle handle, int gpuIndex)
         {
             var gpuName = new NvApi.NvShortString();
-            var status = NvApi.NvAPI_GPU_GetFullName(handle, ref gpuName);
+            var status = _nvidiaApi.NvAPI_GPU_GetFullName(handle, ref gpuName);
 
             return status == NvApi.NvStatus.OK ? gpuName.Value.Trim() : $"GPU - {gpuIndex}";
         }

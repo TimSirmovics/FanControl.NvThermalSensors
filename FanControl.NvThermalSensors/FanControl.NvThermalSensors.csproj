@@ -45,6 +45,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NvApiAdapter.cs" />
+    <Compile Include="INvApi.cs" />
     <Compile Include="NvApi.cs" />
     <Compile Include="NvThermalSensor.cs" />
     <Compile Include="NvThermalSensors.cs" />

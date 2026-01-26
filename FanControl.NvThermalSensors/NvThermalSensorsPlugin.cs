@@ -10,13 +10,14 @@ namespace FanControl.NvThermalSensors
 
         private Dictionary<int, NvApi.NvPhysicalGpuHandle> _handles;
 
-        public string Name => "NvThermalSensors";
-
         public NvThermalSensorsPlugin(IPluginLogger logger)
         {
             _logger = logger;
         }
 
+        public string Name => "NvThermalSensors";
+
+        internal INvApi NvidiaApi { get; set; } = new NvApiAdapter();
 
         public void Close()
         {
@@ -44,7 +45,7 @@ namespace FanControl.NvThermalSensors
 
             foreach (var handle in _handles)
             {
-                var sensors = new NvThermalSensors(handle.Key, handle.Value);
+                var sensors = new NvThermalSensors(handle.Key, handle.Value, NvidiaApi);
                 foreach (var sensor in sensors.Sensors)
                     _container.TempSensors.Add(sensor);
             }
